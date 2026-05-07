@@ -90,7 +90,36 @@ curl -sI https://openclaw-deploy.prin7r.com  # → HTTP/2 200
 
 ## Brand
 
-OpenClaw Deploy uses the **Cold Iron** palette (near-black + phosphor green) with Space Grotesk display, Inter body, and JetBrains Mono for code. The full system is documented in [`docs/01-brand-identity.md`](./docs/01-brand-identity.md).
+OpenClaw Deploy uses the **Cold Iron** palette (near-black + phosphor green) with Space Grotesk display, Inter body, and JetBrains Mono for code. The full system is documented in [`docs/01-brand-identity.md`](./docs/01-brand-identity.md), and the canonical design + style guide is at [`DESIGN.md`](./DESIGN.md).
+
+## Screenshots
+
+Captured from the live deploy with Playwright. Re-runnable via `node scripts/capture-screenshots.mjs`.
+
+**Desktop** (1440×900):
+
+![OpenClaw Deploy — desktop landing](./docs/screenshots/landing-desktop.png)
+
+**Mobile** (390×844):
+
+![OpenClaw Deploy — mobile landing](./docs/screenshots/landing-mobile.png)
+
+## Payments
+
+Cloud tiers route through NOWPayments hosted invoices. Self-hosted (the `install.sh` path) is free. The integration lives at:
+
+- `apps/landing/app/api/checkout/nowpayments/route.ts` — creates the hosted invoice, returns `{invoice_url}` for the browser to redirect to.
+- `apps/landing/app/api/webhooks/nowpayments/route.ts` — IPN webhook stub that verifies `x-nowpayments-sig` HMAC-SHA512.
+
+Required env (set on the server's `/opt/prin7r-deploys/openclaw-deploy/.env`, NEVER committed):
+
+```bash
+NOWPAYMENTS_API_KEY=
+NOWPAYMENTS_IPN_SECRET=
+NOWPAYMENTS_SANDBOX=false
+```
+
+Without these vars, the route returns a clear 503 with `{error: 'missing_env'}` and the Pricing CTAs surface a tasteful inline error.
 
 ## Status
 
