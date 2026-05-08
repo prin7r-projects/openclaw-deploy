@@ -36,6 +36,29 @@ services:
       - "traefik.http.routers.openclaw-deploy-api.tls=true"
       - "traefik.http.routers.openclaw-deploy-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.openclaw-deploy-api.loadbalancer.server.port=8787"
+      - "traefik.http.routers.openclaw-deploy-api.priority=2"
+
+  operator-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.operator-ui
+    container_name: openclaw-deploy-operator
+    restart: unless-stopped
+    expose:
+      - "3001"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8787
+      - COLD_IRON_API_TOKEN=${OPERATOR_API_TOKEN:-}
+    depends_on:
+      - api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openclaw-deploy-operator.rule=Host(`openclaw-deploy.prin7r.com`) && PathPrefix(`/operator`)"
+      - "traefik.http.routers.openclaw-deploy-operator.entrypoints=websecure"
+      - "traefik.http.routers.openclaw-deploy-operator.tls=true"
+      - "traefik.http.routers.openclaw-deploy-operator.tls.certresolver=letsencrypt"
+      - "traefik.http.services.openclaw-deploy-operator.loadbalancer.server.port=3001"
+      - "traefik.http.routers.openclaw-deploy-operator.priority=2"
 
 volumes:
   api-data:

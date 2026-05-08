@@ -45,35 +45,35 @@ export default function RootLayout({
             </div>
             <nav className="space-y-2">
               <a
-                href="/"
+                href="/operator"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-surface-2 hover:text-signal transition-colors"
               >
                 <span className="font-mono text-xs text-signal">//</span>
                 Dashboard
               </a>
               <a
-                href="/fleets"
+                href="/operator/fleets"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-surface-2 hover:text-signal transition-colors"
               >
                 <span className="font-mono text-xs text-signal">//</span>
                 Fleets
               </a>
               <a
-                href="/audit"
+                href="/operator/audit"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-surface-2 hover:text-signal transition-colors"
               >
                 <span className="font-mono text-xs text-signal">//</span>
                 Audit Log
               </a>
               <a
-                href="/costs"
+                href="/operator/costs"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-surface-2 hover:text-signal transition-colors"
               >
                 <span className="font-mono text-xs text-signal">//</span>
                 Costs
               </a>
               <a
-                href="/secrets"
+                href="/operator/secrets"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-surface-2 hover:text-signal transition-colors"
               >
                 <span className="font-mono text-xs text-signal">//</span>
