@@ -28,6 +28,7 @@ export const agents = sqliteTable('agents', {
   specYaml: text('spec_yaml'),
   minReplicas: integer('min_replicas').default(1),
   maxReplicas: integer('max_replicas').default(1),
+  poolCapacity: integer('pool_capacity').default(0),
   placement: text('placement', { enum: ['incus', 'docker', 'vps', 'any'] }).default('any'),
   costCapDailyCents: integer('cost_cap_daily_cents'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),

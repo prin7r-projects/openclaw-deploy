@@ -1,0 +1,25 @@
+apiVersion: openclaw.deploy/v1
+fleet: example-prod
+agents:
+  - name: openclaw-pool
+    type: OpenClaw
+    image: ghcr.io/openclaw/openclaw:1.4.2
+    target: incus://dev2
+    min_replicas: 3
+    max_replicas: 10
+    pool_capacity: 5
+    auth:
+      claude_oauth: ref(vault://oauth/claude_main)
+  - name: hermes-bridge
+    type: Hermes
+    image: ghcr.io/openclaw/hermes:0.9.1
+    target: docker://144
+    min_replicas: 1
+    max_replicas: 4
+    auth:
+      openai_key: ref(vault://keys/openai_main)
+  - name: nanoclaw-worker
+    type: NanoClaw
+    image: ghcr.io/openclaw/nanoclaw:1.4.2
+    target: vps://worker-01
+    replicas: 2

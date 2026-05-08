@@ -46,6 +46,7 @@ export async function initDatabase(): Promise<void> {
       spec_yaml TEXT,
       min_replicas INTEGER DEFAULT 1,
       max_replicas INTEGER DEFAULT 1,
+      pool_capacity INTEGER DEFAULT 0,
       placement TEXT DEFAULT 'any',
       cost_cap_daily_cents INTEGER,
       created_at INTEGER DEFAULT (unixepoch())

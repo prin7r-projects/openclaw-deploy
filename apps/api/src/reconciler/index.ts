@@ -13,6 +13,9 @@ interface FleetManifest {
     image: string;
     target?: string;
     replicas?: number;
+    min_replicas?: number;
+    max_replicas?: number;
+    pool_capacity?: number;
     auth?: Record<string, any>;
   }>;
 }
@@ -200,8 +203,9 @@ export class Reconciler {
             fleetId,
             name: agentSpec.name,
             image: agentSpec.image,
-            minReplicas: agentSpec.replicas ?? 1,
-            maxReplicas: agentSpec.replicas ?? 1,
+            minReplicas: agentSpec.min_replicas ?? agentSpec.replicas ?? 1,
+            maxReplicas: agentSpec.max_replicas ?? agentSpec.replicas ?? 1,
+            poolCapacity: agentSpec.pool_capacity ?? 0,
           });
           agent = (await db.select().from(schema.agents).where(eq(schema.agents.id, agentId)).limit(1))[0];
           
@@ -221,10 +225,15 @@ export class Reconciler {
           .from(schema.pods)
           .where(eq(schema.pods.agentId, agent.id));
 
-        const desiredReplicas = agentSpec.replicas ?? 1;
+        const minReplicas = agentSpec.min_replicas ?? agentSpec.replicas ?? agent.minReplicas ?? 1;
+        const maxReplicas = agentSpec.max_replicas ?? agentSpec.replicas ?? agent.maxReplicas ?? 1;
+        const desiredReplicas = Math.max(minReplicas, Math.min(maxReplicas, agentSpec.replicas ?? minReplicas));
         const runningPods = pods.filter(p => p.health === 'green' || p.health === 'unknown');
 
-        if (runningPods.length < desiredReplicas) {
+        // Check cost cap before scaling up
+        const canSchedule = !agent.costCapDailyCents || (await import('../cost/index.js').then(m => m.costMeter.canScheduleAgent(agent.id)));
+
+        if (runningPods.length < desiredReplicas && canSchedule) {
           // Need to create more pods
           const target = existingTargets[0]; // Simple: use first available target
           if (target) {
