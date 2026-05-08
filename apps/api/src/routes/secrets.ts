@@ -70,4 +70,49 @@ secrets.get('/cost/agent/:agentId/can-schedule', async (c) => {
   return c.json({ agentId, canSchedule });
 });
 
+// Get overall cost summary
+secrets.get('/cost/summary', async (c) => {
+  // Get all fleets
+  const allFleets = await db.select().from(schema.fleets);
+
+  let totalDailyCents = 0;
+  let totalMonthlyCents = 0;
+  const fleetCosts = [];
+
+  for (const fleet of allFleets) {
+    const dailyCents = await costMeter.getFleetCost(fleet.id, 1);
+    const monthlyCents = await costMeter.getFleetCost(fleet.id, 30);
+    totalDailyCents += dailyCents;
+    totalMonthlyCents += monthlyCents;
+    fleetCosts.push({
+      fleetId: fleet.id,
+      fleetName: fleet.name,
+      dailyCents,
+      monthlyCents,
+    });
+  }
+
+  return c.json({
+    totalDailyCents,
+    totalMonthlyCents,
+    fleets: fleetCosts,
+  });
+});
+
+// List all secrets across fleets
+secrets.get('/', async (c) => {
+  const allSecrets = await db
+    .select({
+      id: schema.secrets.id,
+      agentId: schema.secrets.agentId,
+      keyName: schema.secrets.keyName,
+      status: schema.secrets.status,
+      expiresAt: schema.secrets.expiresAt,
+      createdAt: schema.secrets.createdAt,
+    })
+    .from(schema.secrets);
+
+  return c.json({ secrets: allSecrets });
+});
+
 export { secrets };

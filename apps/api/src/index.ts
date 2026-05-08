@@ -9,6 +9,7 @@ import { checkout } from './routes/checkout.js';
 import { nowpaymentsWebhook } from './routes/nowpayments-webhook.js';
 import { auth } from './routes/auth.js';
 import { secrets } from './routes/secrets.js';
+import { eventsSSE } from './routes/events-sse.js';
 import { reconciler } from './reconciler/index.js';
 import { initDatabase } from './db/index.js';
 
@@ -29,6 +30,7 @@ app.get('/', (c) =>
       reconciles: '/api/v1/reconciles',
       webhooks: '/api/v1/webhooks',
       secrets: '/api/v1/secrets',
+      events: '/api/v1/events',
       checkout: '/api/checkout',
     },
   }),
@@ -43,6 +45,7 @@ app.route('/api/v1/fleets', fleets);
 app.route('/api/v1/reconciles', reconciles);
 app.route('/api/v1/webhooks', webhooks);
 app.route('/api/v1/secrets', secrets);
+app.route('/api/v1/events', eventsSSE);
 app.route('/api/checkout', checkout);
 app.route('/api/webhooks/nowpayments', nowpaymentsWebhook);
 

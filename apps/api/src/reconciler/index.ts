@@ -40,6 +40,7 @@ export class Reconciler {
   }
 
   async tick(): Promise<void> {
+    // Process pending fleets
     const fleets = await db.select().from(schema.fleets).where(eq(schema.fleets.status, 'pending'));
 
     for (const fleet of fleets) {
@@ -47,6 +48,98 @@ export class Reconciler {
         console.error(`[Reconciler] Error reconciling fleet ${fleet.id}:`, err);
       });
     }
+
+    // Run drift detection on applied fleets
+    await this.detectDrift().catch(err => {
+      console.error('[Reconciler] Error detecting drift:', err);
+    });
+  }
+
+  async detectDrift(): Promise<void> {
+    const appliedFleets = await db.select().from(schema.fleets).where(eq(schema.fleets.status, 'applied'));
+
+    for (const fleet of appliedFleets) {
+      try {
+        const hasDrift = await this.checkFleetDrift(fleet.id);
+        if (hasDrift) {
+          await db
+            .update(schema.fleets)
+            .set({ status: 'drift_detected', updatedAt: new Date() })
+            .where(eq(schema.fleets.id, fleet.id));
+
+          // Emit drift event
+          const reconcileId = nanoid();
+          await db.insert(schema.reconciles).values({
+            id: reconcileId,
+            fleetId: fleet.id,
+            yamlRevision: fleet.yamlRevision,
+            status: 'finished',
+            user: 'drift_detector',
+          });
+
+          await db.insert(schema.events).values({
+            id: nanoid(),
+            reconcileId,
+            type: 'drifted',
+            payload: { fleetId: fleet.id, detectedAt: new Date().toISOString() },
+          });
+
+          console.log(`[Reconciler] Drift detected in fleet ${fleet.id}`);
+        }
+      } catch (err) {
+        console.error(`[Reconciler] Error checking drift for fleet ${fleet.id}:`, err);
+      }
+    }
+  }
+
+  async checkFleetDrift(fleetId: string): Promise<boolean> {
+    const agents = await db
+      .select()
+      .from(schema.agents)
+      .where(eq(schema.agents.fleetId, fleetId));
+
+    const targets = await db
+      .select()
+      .from(schema.targets)
+      .where(eq(schema.targets.fleetId, fleetId));
+
+    for (const target of targets) {
+      try {
+        const isHealthy = await executorManager.checkTargetHealth(target.id);
+        if (!isHealthy) {
+          await db
+            .update(schema.targets)
+            .set({ status: 'unreachable', checkedAt: new Date() })
+            .where(eq(schema.targets.id, target.id));
+          return true;
+        } else {
+          await db
+            .update(schema.targets)
+            .set({ status: 'ready', checkedAt: new Date() })
+            .where(eq(schema.targets.id, target.id));
+        }
+      } catch {
+        await db
+          .update(schema.targets)
+          .set({ status: 'degraded', checkedAt: new Date() })
+          .where(eq(schema.targets.id, target.id));
+        return true;
+      }
+    }
+
+    for (const agent of agents) {
+      const pods = await db
+        .select()
+        .from(schema.pods)
+        .where(eq(schema.pods.agentId, agent.id));
+
+      const runningPods = pods.filter(p => p.health === 'green' || p.health === 'unknown');
+      if (runningPods.length < (agent.minReplicas ?? 1)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async reconcileFleet(fleetId: string): Promise<void> {

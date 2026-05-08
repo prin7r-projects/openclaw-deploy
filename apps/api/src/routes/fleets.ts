@@ -8,6 +8,44 @@ const fleets = new Hono();
 
 fleets.use('/*', authMiddleware);
 
+// List all fleets for the authenticated user
+fleets.get('/', async (c) => {
+  const userId = c.get('userId');
+
+  const userFleets = await db
+    .select()
+    .from(schema.fleets)
+    .where(eq(schema.fleets.userId, userId));
+
+  // Get agent counts for each fleet
+  const fleetsWithCounts = await Promise.all(
+    userFleets.map(async (fleet) => {
+      const fleetAgents = await db
+        .select()
+        .from(schema.agents)
+        .where(eq(schema.agents.fleetId, fleet.id));
+
+      const agentIds = fleetAgents.map(a => a.id);
+      let podCount = 0;
+      if (agentIds.length > 0) {
+        const pods = await db
+          .select()
+          .from(schema.pods)
+          .where(eq(schema.pods.agentId, agentIds[0]));
+        podCount = pods.length;
+      }
+
+      return {
+        ...fleet,
+        agentCount: fleetAgents.length,
+        podCount,
+      };
+    })
+  );
+
+  return c.json({ fleets: fleetsWithCounts });
+});
+
 fleets.get('/:id', async (c) => {
   const fleetId = c.req.param('id');
   const userId = c.get('userId');

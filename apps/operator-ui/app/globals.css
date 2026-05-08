@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --surface-0: #0B0E12;
+    --surface-1: #11161D;
+    --surface-2: #1B232E;
+    --border: #27313F;
+    --border-subtle: #1F2733;
+    --text-primary: #E6ECF2;
+    --text-muted: #7E8A9A;
+    --signal: #7CFFA1;
+    --warn: #FFC857;
+    --alert: #FF6B6B;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-surface-0 text-text-primary font-sans;
+  }
+}
