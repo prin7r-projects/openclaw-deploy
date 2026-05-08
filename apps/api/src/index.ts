@@ -1,21 +1,32 @@
-/**
- * OpenClaw Deploy — control plane API (Wave 2 stub).
- *
- * For Wave 2 batch 1, this app is intentionally a "hello" endpoint stub.
- * The full reconciler, manifest validation, and driver layer described in
- * /docs/02-architecture.md ship in a later wave.
- */
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+import { serve } from '@hono/node-server';
+import { fleets } from './routes/fleets.js';
+import { reconciles } from './routes/reconciles.js';
+import { webhooks } from './routes/webhooks.js';
+import { checkout } from './routes/checkout.js';
+import { nowpaymentsWebhook } from './routes/nowpayments-webhook.js';
+import { auth } from './routes/auth.js';
 
 const app = new Hono();
+
+app.use('*', logger());
+app.use('*', cors());
 
 app.get('/', (c) =>
   c.json({
     service: 'openclaw-deploy-api',
     status: 'ok',
-    version: '0.1.0',
-    note: 'Wave 2 stub — full control plane in a later wave.',
-    repo: 'https://github.com/prin7r-projects/openclaw-deploy',
+    version: '0.2.0',
+    endpoints: {
+      healthz: '/healthz',
+      auth: '/api/auth',
+      fleets: '/api/v1/fleets',
+      reconciles: '/api/v1/reconciles',
+      webhooks: '/api/v1/webhooks',
+      checkout: '/api/checkout',
+    },
   }),
 );
 
@@ -23,9 +34,18 @@ app.get('/healthz', (c) =>
   c.json({ status: 'ok', service: 'openclaw-deploy-api' }),
 );
 
-const port = Number(process.env.PORT ?? 8787);
+app.route('/api/auth', auth);
+app.route('/api/v1/fleets', fleets);
+app.route('/api/v1/reconciles', reconciles);
+app.route('/api/v1/webhooks', webhooks);
+app.route('/api/checkout', checkout);
+app.route('/api/webhooks/nowpayments', nowpaymentsWebhook);
 
-export default {
-  port,
+const port = Number(process.env.COLD_IRON_PORT ?? process.env.API_PORT ?? 8787);
+
+console.log(`[Cold Iron] Control plane starting on :${port}`);
+
+serve({
   fetch: app.fetch,
-};
+  port,
+});

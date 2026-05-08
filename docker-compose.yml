@@ -14,3 +14,28 @@ services:
       - "traefik.http.routers.openclaw-deploy.tls=true"
       - "traefik.http.routers.openclaw-deploy.tls.certresolver=letsencrypt"
       - "traefik.http.services.openclaw-deploy.loadbalancer.server.port=3000"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: openclaw-deploy-api
+    restart: unless-stopped
+    expose:
+      - "8787"
+    volumes:
+      - api-data:/app/data
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=/app/data/coldiron.db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openclaw-deploy-api.rule=Host(`openclaw-deploy.prin7r.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.openclaw-deploy-api.entrypoints=websecure"
+      - "traefik.http.routers.openclaw-deploy-api.tls=true"
+      - "traefik.http.routers.openclaw-deploy-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.openclaw-deploy-api.loadbalancer.server.port=8787"
+
+volumes:
+  api-data:

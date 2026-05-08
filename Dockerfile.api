@@ -1,0 +1,19 @@
+FROM node:20-slim AS base
+WORKDIR /app
+
+# Install dependencies
+COPY apps/api/package.json apps/api/package-lock.json* ./
+RUN npm ci --production=false 2>/dev/null || npm install
+
+# Copy source
+COPY apps/api/ .
+
+# Generate migrations
+RUN npx drizzle-kit generate 2>/dev/null || true
+
+# Create data directory
+RUN mkdir -p /app/data
+
+EXPOSE 8787
+
+CMD ["npx", "tsx", "src/index.ts"]
