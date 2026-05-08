@@ -8,6 +8,7 @@ import { webhooks } from './routes/webhooks.js';
 import { checkout } from './routes/checkout.js';
 import { nowpaymentsWebhook } from './routes/nowpayments-webhook.js';
 import { auth } from './routes/auth.js';
+import { secrets } from './routes/secrets.js';
 import { reconciler } from './reconciler/index.js';
 import { initDatabase } from './db/index.js';
 
@@ -20,13 +21,14 @@ app.get('/', (c) =>
   c.json({
     service: 'openclaw-deploy-api',
     status: 'ok',
-    version: '0.2.0',
+    version: '0.3.0',
     endpoints: {
       healthz: '/healthz',
       auth: '/api/auth',
       fleets: '/api/v1/fleets',
       reconciles: '/api/v1/reconciles',
       webhooks: '/api/v1/webhooks',
+      secrets: '/api/v1/secrets',
       checkout: '/api/checkout',
     },
   }),
@@ -40,6 +42,7 @@ app.route('/api/auth', auth);
 app.route('/api/v1/fleets', fleets);
 app.route('/api/v1/reconciles', reconciles);
 app.route('/api/v1/webhooks', webhooks);
+app.route('/api/v1/secrets', secrets);
 app.route('/api/checkout', checkout);
 app.route('/api/webhooks/nowpayments', nowpaymentsWebhook);
 
