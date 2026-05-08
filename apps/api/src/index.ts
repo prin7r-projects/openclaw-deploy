@@ -8,6 +8,8 @@ import { webhooks } from './routes/webhooks.js';
 import { checkout } from './routes/checkout.js';
 import { nowpaymentsWebhook } from './routes/nowpayments-webhook.js';
 import { auth } from './routes/auth.js';
+import { reconciler } from './reconciler/index.js';
+import { initDatabase } from './db/index.js';
 
 const app = new Hono();
 
@@ -43,9 +45,22 @@ app.route('/api/webhooks/nowpayments', nowpaymentsWebhook);
 
 const port = Number(process.env.COLD_IRON_PORT ?? process.env.API_PORT ?? 8787);
 
-console.log(`[Cold Iron] Control plane starting on :${port}`);
+async function main() {
+  console.log(`[Cold Iron] Control plane starting on :${port}`);
+  
+  // Initialize database
+  await initDatabase();
+  
+  // Start the reconciler
+  reconciler.start();
 
-serve({
-  fetch: app.fetch,
-  port,
+  serve({
+    fetch: app.fetch,
+    port,
+  });
+}
+
+main().catch(err => {
+  console.error('[Cold Iron] Failed to start:', err);
+  process.exit(1);
 });
