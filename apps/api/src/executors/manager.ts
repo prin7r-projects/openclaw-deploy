@@ -1,6 +1,7 @@
 import { ExecutorDriver, PodInfo } from './types.js';
 import { DockerExecutor, DockerConfig } from './docker.js';
 import { IncusExecutor, IncusConfig } from './incus.js';
+import { VPSExecutor, VPSConfig } from './vps.js';
 
 export type TargetKind = 'incus' | 'docker' | 'vps';
 
@@ -49,7 +50,10 @@ export class ExecutorManager {
           ...config,
         });
       case 'vps':
-        throw new Error('VPS driver not implemented yet — use Docker or Incus');
+        return new VPSExecutor({
+          host: hostUri,
+          ...config,
+        });
       default:
         throw new Error(`Unknown target kind: ${kind}`);
     }

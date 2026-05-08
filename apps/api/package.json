@@ -17,6 +17,7 @@
     "drizzle-orm": "^0.38.3",
     "hono": "^4.6.18",
     "nanoid": "^5.0.9",
+    "ssh2": "^1.17.0",
     "yaml": "^2.8.4"
   },
   "devDependencies": {
