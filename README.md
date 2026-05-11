@@ -66,6 +66,13 @@ curl -s http://localhost:8787/healthz
 # → {"status":"ok","service":"openclaw-deploy-api"}
 ```
 
+### Python game
+
+```bash
+python3 games/starfall.py
+python3 games/starfall.py --demo --seed 7 --turns 5
+```
+
 ### Docker (production-style local)
 
 ```bash
