@@ -36,3 +36,8 @@ coverage/
 
 # bun
 bun.lockb
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key

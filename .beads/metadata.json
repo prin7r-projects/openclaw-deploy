@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "openclaw_deploy",
+  "project_id": "61a42bff-43de-42d9-8514-3d84c5a6d111"
+}
