@@ -8,6 +8,22 @@ OpenClaw Deploy is a declarative control plane for OpenClaw, Hermes, and NanoCla
 - **Notion opportunity**: <https://www.notion.so/OpenClaw-deployment-management-3593ceec26198160be33c7a88f5abcac>
 - **License**: MIT
 
+## Clean OpenClaw deploy gate
+
+Current fallback work is gated by [`docs/14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md).
+That runbook is the only authorized deployment slice in this repository until
+the older control-plane/fleet material is reconciled with the Prin7r policy.
+
+Allowed deployment modes for OpenClaw production are:
+
+- bare-metal systemd running a plain OpenClaw gateway with MCP servers, skills,
+  tools, and the native Telegram channel;
+- a plain Incus container running the same clean OpenClaw shape.
+
+Forbidden deployment layers are listed in the audit runbook. Alex/Katya
+production is server 171 only from `/Users/keer/projects/simple-agent-deploy`;
+the old host is decommissioned.
+
 ## Why this exists
 
 Today, spinning up an OpenClaw / Hermes / NanoClaw fleet means: manual Incus or Docker provisioning, manual env-key wiring, per-agent OAuth-token wiring, and bash scripts that fail at 03:00 during quarterly token rotation. There is no unified surface to declare "I want N agents of type X with profile Y" and have them appear, scale, and report health.
@@ -21,7 +37,7 @@ openclaw-deploy/
 ├─ apps/
 │  ├─ landing/        Next.js 15 + Tailwind + ShadCN-style components (this wave)
 │  └─ api/            Bun + Hono control plane stub (Wave 2 placeholder)
-├─ docs/              The 10 strategy/design docs + pitch deck
+├─ docs/              Strategy/design docs, pitch deck, and clean deploy audit gate
 ├─ Dockerfile.landing Multistage Next.js standalone build
 ├─ docker-compose.yml Single-service deploy with Traefik labels
 └─ .github/workflows/ landing-build CI
@@ -31,7 +47,7 @@ The full reconciler, manifest validation, and driver layer described in [`docs/0
 
 ## Documentation
 
-The `/docs/` folder contains the 10 strategy and design documents that drive this project:
+The `/docs/` folder contains the strategy and design documents that drive this project:
 
 1. [`01-brand-identity.md`](./docs/01-brand-identity.md) — Cold Iron palette, Space Grotesk + Inter + JetBrains Mono, brand pyramid
 2. [`02-architecture.md`](./docs/02-architecture.md) — System diagram, components, data flow, deploy topology
@@ -43,6 +59,7 @@ The `/docs/` folder contains the 10 strategy and design documents that drive thi
 8. [`08-marketing-strategy.md`](./docs/08-marketing-strategy.md) — Positioning, content pillars, launch sequence
 9. [`09-go-to-market.md`](./docs/09-go-to-market.md) — 90-day plan
 10. [`10-pitch-deck.md`](./docs/10-pitch-deck.md) — 10-slide deck (with companion `pitch-deck.html`)
+11. [`14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md) — Clean OpenClaw deployment preflight, command gates, and blocker list
 
 ## Local development
 
@@ -73,27 +90,30 @@ python3 games/starfall.py
 python3 games/starfall.py --demo --seed 7 --turns 5
 ```
 
-### Docker (production-style local)
+### Docker artifacts
 
-```bash
-docker compose build
-docker compose up -d
-# Landing → http://localhost (when behind Traefik)
-```
+Docker and compose artifacts exist in the repository from the older landing
+deployment path, but they are not an authorized OpenClaw production deployment
+path. Do not edit `Dockerfile*`, `docker-compose.yml`, `install.sh`, or
+deploy/runtime scripts as part of the clean OpenClaw fallback slice.
 
 ## Deployment
 
-The landing is deployed to `openclaw-deploy.prin7r.com` on `storage-contabo` (Contabo VPS, 161.97.99.120) via Docker Compose behind a Dokploy-managed Traefik with Let's Encrypt TLS. Wildcard DNS for `*.prin7r.com` is already in place — no per-subdomain DNS work is required.
+Production deployment from this repository is blocked until the gates in
+[`docs/14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md) pass.
 
-```bash
-ssh storage-contabo
-sudo mkdir -p /opt/prin7r-deploys/openclaw-deploy
-cd /opt/prin7r-deploys/openclaw-deploy
-git clone https://github.com/prin7r-projects/openclaw-deploy.git .
-docker compose build
-docker compose up -d
-curl -sI https://openclaw-deploy.prin7r.com  # → HTTP/2 200
-```
+The authorized path is plain OpenClaw only:
+
+1. Choose bare-metal systemd or a plain Incus container.
+2. Load required secrets from `/Users/keer/.nth-kir-keys.env` without copying
+   them into this repository.
+3. Verify OpenClaw gateway, MCP servers, skills, tools, and native Telegram
+   channel directly.
+4. Prove behavior with loopback/OpenClaw command smoke tests before any public
+   channel test.
+
+Do not deploy this project through any forbidden layer listed in the audit
+runbook.
 
 ## Brand
 
@@ -131,6 +151,8 @@ Without these vars, the route returns a clear 503 with `{error: 'missing_env'}` 
 ## Status
 
 Wave 2 batch 1, May 2026 — landing live, docs complete, control plane API stubbed.
+June 2, 2026 fallback slice added a clean OpenClaw deployment gate and marked
+the older control-plane/fleet deployment story as blocked until policy cleanup.
 
 The reconciler, manifest validator, drivers (Incus / Docker / VPS), CLI binary `occ`, and operator dashboard are scheduled for a follow-up wave.
 
