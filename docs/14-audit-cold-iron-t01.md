@@ -8,6 +8,58 @@ authorize the older product-control-plane story in the rest of the docs. It is
 intentionally narrow: policy checklist, allowed deployment path, forbidden layer
 grep checklist, env/secret preflight, command gates, and current blockers.
 
+## Deploy-Policy Scope Ruling (PRI-3648, 2026-06-02)
+
+This runbook's forbidden-layer ban was being read as if it covered the entire
+product repository, which contradicted the live marketing landing at
+`https://openclaw-deploy.prin7r.com` (HTTP 200) — served via `docker-compose.yml`
+plus a Traefik reverse proxy. That apparent contradiction is resolved as
+follows. The ban is scoped to **the OpenClaw agent runtime**, not to the
+product's own web tier or to product positioning copy. Three planes:
+
+**Plane A — OpenClaw agent runtime. The ban APPLIES (unchanged).**
+Any process that actually runs a live OpenClaw / Hermes / NanoClaw gateway —
+serving model traffic, MCP servers, skills, tools, and the native Telegram
+channel. Today this is Alex (`openclaw-alex.service`) and Katya
+(`openclaw-katya.service`) on server `213.136.83.171`, plus any future
+control-plane-managed customer fleet. Allowed deployment shapes are only the two
+in "Allowed Deployment Path" below (bare-metal systemd or a plain Incus
+container). Docker Compose, Railway, Coolify, Dokploy, docker-agent-fleet,
+CosmOS, nested orchestrators, and custom Telegram bridges remain forbidden here.
+
+**Plane B — Product web tier. The ban DOES NOT APPLY (carve-out).**
+The OpenClaw Deploy product's own shop-window: the marketing landing
+(`apps/landing`, Next.js), the `/api` control-plane stub (`apps/api`), and the
+operator UI (`apps/operator-ui`). These are stateless web services. They hold no
+agent state, run no OpenClaw gateway, route no model or Telegram traffic, and
+manage no fleet. The canonical and authorized deploy path for this tier is the
+repository's `docker-compose.yml` + Traefik on the web host — which is what the
+live landing already runs. This is ordinary web hosting and is explicitly
+permitted. The live Compose deploy is therefore NOT a policy violation.
+
+**Plane C — Product domain vocabulary. Not a deploy method at all.**
+Strategy/architecture/sales docs that *name* Docker, Dokploy, or Coolify as the
+product's integration targets or named competitors (e.g.
+`docs/02-architecture.md`, `docs/04-pain-points.md`, `docs/07-sales-strategy.md`,
+`docs/10-pitch-deck.md`, `docs/pitch-deck.html`) describe what the product does
+for its users. They are not OpenClaw deployment instructions and must not be
+treated as forbidden-layer matches.
+
+**Guardrail (when the carve-out expires).** The Plane B carve-out is for web
+services only. If the `/api` stub or operator UI ever gains the ability to
+actually spawn, host, or run live OpenClaw agents (rather than merely call out to
+a fleet), that agent-running component crosses into Plane A and must move to the
+bare-metal-systemd / plain-Incus path. The web frontends may stay on Compose.
+
+This ruling is the canonical resolution; the grep-gate expectations below are
+corrected to match it.
+
+**Owner notification.** The owners tracked in PRI-3519 and PRI-2911 are notified
+of this ruling via PRI-3648; they may treat the live Plane B Compose/Traefik
+deploy of the landing, `/api` stub, and operator UI as authorized and may stop
+filing it as an audit violation. Plane A (live OpenClaw agent gateways) remains
+gated on bare-metal-systemd / plain-Incus per the Allowed Deployment Path below.
+
 ## Policy Checklist
 
 - OpenClaw production must be plain OpenClaw only: gateway, MCP servers, skills,
@@ -24,6 +76,11 @@ grep checklist, env/secret preflight, command gates, and current blockers.
   described as interchangeable.
 
 ## Forbidden Layers
+
+These are forbidden **for the Plane A OpenClaw agent runtime** (see the scope
+ruling above). They are not forbidden for the Plane B product web tier, where
+`docker-compose.yml` + Traefik is the authorized path, and they may be *named*
+as product integration targets / competitors in Plane C positioning copy.
 
 Do not use or introduce:
 
@@ -93,6 +150,29 @@ Required:
 Use these commands as gates. `docs/14-audit-cold-iron-t01.md` is excluded from
 strict grep because it intentionally contains the denylist.
 
+**Scope correction (PRI-3648).** This grep is a heuristic for catching a
+forbidden **agent-runtime** deploy path or a leaked secret/decommissioned host.
+It is not a literal-string ban across the whole repo. Per the scope ruling
+above, two match classes are EXPECTED and are NOT blockers:
+
+- Plane C product-positioning docs and UI copy that name Docker / Dokploy /
+  Coolify / Railway / CosmOS as integration targets or competitors
+  (`docs/02-architecture.md`, `docs/04-pain-points.md`,
+  `docs/06-sales-channels.md`, `docs/07-sales-strategy.md`,
+  `docs/09-go-to-market.md`, `docs/10-pitch-deck.md`,
+  `docs/12-technical-specification.md`, `docs/pitch-deck.html`, and
+  `apps/landing/components/Faq.tsx`).
+- The Plane B web-tier `docker-compose.yml` + Traefik labels, and the
+  `install.sh` web-tier bootstrap that runs `docker compose build` / `up`
+  for the landing + `/api` stub + operator UI.
+
+A match is a real blocker only when it would put an **OpenClaw agent gateway**
+(Plane A) on a forbidden layer, or when it leaks a secret, a custom Telegram
+transport, a stale `codex-cli`/`openai-codex` model ref, or the decommissioned
+host `187.127.230.45`. The strict-zero expectation below therefore applies after
+excluding the Plane B/C files; treat residual matches against that narrowed set
+as blockers.
+
 ```bash
 rg -n -i "Railway|Coolify|Dokploy|docker-agent-fleet|CosmOS|n8n|Calendly|SiYuan|UNDB|custom Telegram|Telegram bridge|Telegram.*poll|polling loop|Docker Compose|openai-codex|codex-cli|187\\.127\\.230\\.45" README.md docs --glob '!docs/14-audit-cold-iron-t01.md'
 ```
@@ -143,9 +223,11 @@ the test recipient is explicitly approved.
 
 ## Current Blockers
 
-- Existing README/docs still contain legacy control-plane language around mixed
-  Incus/Docker/VPS targets, Dokploy, Docker Compose, and integrations. That
-  material is not an authorized OpenClaw production path.
+- Existing README/docs contain control-plane language around mixed
+  Incus/Docker/VPS targets, Dokploy, and integrations. Per the PRI-3648 scope
+  ruling, that material is Plane C product positioning (what the product manages
+  for users), not an authorized OpenClaw agent-runtime deploy path — it is no
+  longer a blocker, only a reminder that it does not describe Plane A.
 - This local repository has product stubs for API, operator UI, executors, and
   CLI, but it does not yet contain filesystem evidence for a clean plain
   OpenClaw deploy.

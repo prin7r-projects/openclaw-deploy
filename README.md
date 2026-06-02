@@ -8,21 +8,28 @@ OpenClaw Deploy is a declarative control plane for OpenClaw, Hermes, and NanoCla
 - **Notion opportunity**: <https://www.notion.so/OpenClaw-deployment-management-3593ceec26198160be33c7a88f5abcac>
 - **License**: MIT
 
-## Clean OpenClaw deploy gate
+## Deploy policy: two planes
 
-Current fallback work is gated by [`docs/14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md).
-That runbook is the only authorized deployment slice in this repository until
-the older control-plane/fleet material is reconciled with the Prin7r policy.
+Per the [PRI-3648 scope ruling](./docs/14-audit-cold-iron-t01.md#deploy-policy-scope-ruling-pri-3648-2026-06-02),
+the deploy-policy ban is scoped to **the OpenClaw agent runtime**, not to this
+product's own web tier:
 
-Allowed deployment modes for OpenClaw production are:
+- **Agent runtime (Plane A)** — anything that runs a live OpenClaw / Hermes /
+  NanoClaw gateway (Alex, Katya, future customer fleets). Authorized modes are
+  **only** bare-metal systemd or a plain Incus container, each running a plain
+  OpenClaw gateway with MCP servers, skills, tools, and the native Telegram
+  channel. Fleet orchestrators and the forbidden layers in the audit runbook are
+  banned here. Alex/Katya production is server 171 only, deployed from
+  `/Users/keer/projects/simple-agent-deploy`; the old host is decommissioned.
+- **Product web tier (Plane B)** — the marketing landing, the `/api` stub, and
+  the operator UI. These are stateless web services that run no gateway and hold
+  no agent state. The authorized, canonical path for this tier is the
+  repository's container-orchestration manifest + Traefik reverse proxy on the
+  web host, which is exactly what the live landing already runs. This is **not**
+  a policy violation.
 
-- bare-metal systemd running a plain OpenClaw gateway with MCP servers, skills,
-  tools, and the native Telegram channel;
-- a plain Incus container running the same clean OpenClaw shape.
-
-Forbidden deployment layers are listed in the audit runbook. Alex/Katya
-production is server 171 only from `/Users/keer/projects/simple-agent-deploy`;
-the old host is decommissioned.
+See the audit runbook for the full ruling, the guardrail on when the web-tier
+carve-out expires, and the corrected grep-gate expectations.
 
 ## Why this exists
 
@@ -92,17 +99,27 @@ python3 games/starfall.py --demo --seed 7 --turns 5
 
 ### Docker artifacts
 
-Docker and compose artifacts exist in the repository from the older landing
-deployment path, but they are not an authorized OpenClaw production deployment
-path. Do not edit `Dockerfile*`, `docker-compose.yml`, `install.sh`, or
-deploy/runtime scripts as part of the clean OpenClaw fallback slice.
+`Dockerfile.*` and the container-orchestration manifest are the **authorized
+Plane B web-tier deploy path** (marketing landing + `/api` stub + operator UI),
+behind a Traefik reverse proxy — this is what the live landing runs. They are
+**not** an OpenClaw agent-runtime (Plane A) deploy path: never run a live
+OpenClaw gateway through them. Editing these files is out of scope for the clean
+OpenClaw agent-runtime fallback slice, but they remain the correct way to ship
+the website.
 
 ## Deployment
 
-Production deployment from this repository is blocked until the gates in
-[`docs/14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md) pass.
+Deployment splits by plane (see the
+[PRI-3648 scope ruling](./docs/14-audit-cold-iron-t01.md#deploy-policy-scope-ruling-pri-3648-2026-06-02)).
 
-The authorized path is plain OpenClaw only:
+**Web tier (Plane B — landing / API stub / operator UI).** Authorized today via
+the repository's container-orchestration manifest + Traefik on the web host.
+This is the live path for `https://openclaw-deploy.prin7r.com` and is not gated.
+
+**OpenClaw agent runtime (Plane A).** Production of a live OpenClaw gateway is
+blocked until the gates in
+[`docs/14-audit-cold-iron-t01.md`](./docs/14-audit-cold-iron-t01.md) pass. The
+authorized path is plain OpenClaw only:
 
 1. Choose bare-metal systemd or a plain Incus container.
 2. Load required secrets from `/Users/keer/.nth-kir-keys.env` without copying
@@ -112,8 +129,8 @@ The authorized path is plain OpenClaw only:
 4. Prove behavior with loopback/OpenClaw command smoke tests before any public
    channel test.
 
-Do not deploy this project through any forbidden layer listed in the audit
-runbook.
+Do not run an OpenClaw agent gateway through any forbidden layer listed in the
+audit runbook.
 
 ## Brand
 
