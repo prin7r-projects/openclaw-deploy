@@ -80,7 +80,13 @@ zero installs were warranted at v1 surface size".
 
 ## 4. Color tokens
 
-Palette name: **Cold Iron**. Source: [`docs/01-brand-identity.md`](./docs/01-brand-identity.md#palette--cold-iron).
+Palette name: **Cold Iron** (monochrome, PRI-3519 retokenization). Source: [`docs/01-brand-identity.md`](./docs/01-brand-identity.md#palette--cold-iron-monochrome-pri-3519-retokenization).
+
+The Wave 2 polish pass shipped a chromatic "phosphor-green / amber / coral"
+palette, but the Wave One taste standard retokenized (PRI-3519) to a pure
+black/white/neutral-gray scale. The brand-accent colors were removed from
+CTA, badge, border, and state surfaces. State meaning is now carried by
+the label next to the dot, not by hue.
 
 | Token | Hex | Tailwind class | Role |
 |---|---|---|---|
@@ -91,22 +97,33 @@ Palette name: **Cold Iron**. Source: [`docs/01-brand-identity.md`](./docs/01-bra
 | `border.subtle` | `#1F2733` | `border-border-subtle` | Inner divider, lower contrast |
 | `text.primary` | `#E6ECF2` | `text-text-primary` | Body text on dark |
 | `text.muted` | `#7E8A9A` | `text-text-muted` | Captions, labels, secondary |
-| `accent.signal` | `#7CFFA1` | `text-signal` / `bg-signal` | Primary CTA + healthy/running — phosphor green |
-| `accent.warn` | `#FFC857` | `text-warn` | Drift / draining / pending — amber |
-| `accent.alert` | `#FF6B6B` | `text-alert` | Error / down — desaturated coral |
+| `accent.signal` | `#E6ECF2` | `text-signal` / `bg-signal` | Primary CTA + healthy/running — **off-white** (was phosphor green `#7CFFA1`) |
+| `accent.warn` | `#B8B8B8` | `text-warn` | Drift / draining / pending — **light neutral gray** (was amber `#FFC857`) |
+| `accent.alert` | `#6B6B6B` | `text-alert` | Error / down — **dim neutral gray** (was coral `#FF6B6B`) |
+
+**Forbidden hues as brand accents** (PRI-3519): `orange`, `violet`, `coral`,
+`fuchsia`, `indigo`, and any other chromatic color used as a CTA / badge /
+border / state accent. Use only the three neutral state tokens above.
 
 **Contrast notes**:
 
 - `text.primary` on `surface.0` measures ≈ 14.0:1 (passes WCAG AAA for body).
 - `text.muted` on `surface.0` measures ≈ 5.4:1 (passes AA for normal text and
   AAA for large/bold).
-- `signal` on `surface.0` measures ≈ 14.5:1 — comfortably AAA. We use it for
-  CTAs and never for body text.
+- `signal` (`#E6ECF2`) on `surface.0` measures ≈ 14.0:1 — comfortably AAA. We
+  use it for CTAs and never for body text.
+- `warn` (`#B8B8B8`) on `surface.0` measures ≈ 8.6:1 — comfortably AA for
+  large/bold, AA for body.
+- `alert` (`#6B6B6B`) on `surface.0` measures ≈ 3.3:1 — fails AA for body, but
+  it is only ever used paired with a `running` / `draining` / `down` text
+  label so the word carries the meaning, not the color.
 
 **Forbidden mixes**:
 
 - No `signal` text on `signal/10` background block (low contrast).
 - No `text.muted` on `surface.2` for paragraphs — only for badges.
+- No chromatic state hue (orange, violet, coral, fuchsia, indigo, etc.) on
+  CTA, badge, border, or status surface.
 
 ## 5. Typography
 
@@ -157,8 +174,9 @@ the eye reads structure without noise.
 **Shadows**: extremely restrained.
 
 - Cards: no shadow at rest. Hover gets `border-color` change only.
-- Manifest card: a single `shadow-[0_24px_60px_-30px_rgba(124,255,161,0.18)]`
-  — the only place we use a glow, and even then only as a dim phosphor halo.
+- Manifest card: a single `shadow-[0_24px_60px_-30px_rgba(230,236,242,0.10)]`
+  — the only place we use a glow, and even then only as a dim off-white halo
+  (was phosphor green `rgba(124,255,161,0.18)` prior to PRI-3519).
 - The hero has a single `radial-gradient` halo behind the heading. That is
   the entire decoration budget for the page.
 
@@ -244,9 +262,10 @@ Anchors are `#features`, `#manifest`, `#pricing`, `#faq`.
 ## 10. Imagery and generated asset rules
 
 OpenClaw Deploy ships **without raster hero imagery**. The visual system uses
-**typography + colored status density** in lieu of illustration. The hero halo
-is a `radial-gradient(closest-side, #7CFFA1 0%, transparent 100%)` SVG-free
-glow; the bracketed-claw logo is inline SVG in `Logo.tsx`.
+**typography + status density** in lieu of illustration. The hero halo
+(per PRI-3519) is a `radial-gradient(closest-side, #E6ECF2 0%, transparent 100%)`
+SVG-free glow — neutral off-white, not phosphor green. The bracketed-claw logo
+is inline SVG in `Logo.tsx`.
 
 We do not currently generate hero imagery via `prin7r-generate-image` because
 the visual register is anti-illustration — adding a stock-feel image would
@@ -254,10 +273,11 @@ break the operator register. If a future spec wants imagery (e.g., for a
 case-study sub-page), the prompt template is:
 
 ```
-Composition: an 8-foot-wide rack-mounted server illuminated by amber and
-phosphor-green status LEDs in a near-black room; subtle blue cast on the
-metalwork. Mood: late-shift NOC, calm, alert. Color: anchored to Cold Iron
-palette (#0B0E12 surface, #7CFFA1 accent LEDs, #FFC857 warn LEDs).
+Composition: an 8-foot-wide rack-mounted server illuminated by off-white
+status LEDs in a near-black room; subtle blue cast on the metalwork. Mood:
+late-shift NOC, calm, alert. Color: anchored to Cold Iron monochrome palette
+(#0B0E12 surface, #E6ECF2 off-white LEDs, #B8B8B8 secondary LEDs). No
+chromatic brand accents (no green, amber, coral, violet, fuchsia, indigo).
 Aspect: 16:9 hero. No people. No logos. No text overlay.
 ```
 
@@ -274,7 +294,7 @@ Operator tooling does not dance. Motion budget is intentionally narrow.
 |---|---|---|---|
 | Hover on button / card | 120 ms | `ease-out` | Border color shift, faint inset glow on `signal` accent only |
 | Focus ring | 0 ms | — | Snaps in immediately on `:focus-visible` |
-| Status dot — healthy | `1.6s` | infinite ease-in-out | 6 px outer phosphor halo pulse |
+| Status dot — healthy | `1.6s` | infinite ease-in-out | 6 px outer off-white halo pulse (was phosphor green) |
 | Status dot — drift / draining | static | — | No animation |
 | Status dot — down | `2s steps(2)` | infinite | Two-step blink |
 | Section reveal on scroll | — | — | **Forbidden.** No fade-in, no slide-up, no parallax. |
@@ -356,11 +376,14 @@ PR.
 - Hashicorp docs (`hashicorp.com/products/terraform`) — calm operator tone,
   manifest examples on landing.
 - Tailscale admin (`tailscale.com/admin`) — restrained dashboard aesthetic
-  with phosphor-adjacent accent.
+  with restrained accent treatment.
 - Linear's keyboard mode (`linear.app`) — keyboard-first interaction,
   understated motion.
-- Grafana / Prometheus — amber/coral status color tradition.
-- `top` / `htop` / `tmux` — phosphor-green-on-near-black lineage.
+- Grafana / Prometheus — status-color tradition; we follow the *layout and
+  density* convention, not the chromatic amber/coral accents (which were
+  retired in PRI-3519).
+- `top` / `htop` / `tmux` / `man` pages — off-white-on-near-black lineage
+  (the previous "phosphor-green" reference is now neutralized to off-white).
 
 **Libraries**:
 
@@ -384,6 +407,7 @@ landings; we deliberately landed on a quieter register.
 
 | Date | Change |
 |---|---|
+| 2026-06-02 | **PRI-3519 monochrome retokenization.** Phosphor green `#7CFFA1`, amber `#FFC857`, coral `#FF6B6B`, and violet `#C4B5FD` were removed from CTA / badge / border / state surfaces on `apps/landing` and `apps/operator-ui`. State tokens now map to off-white (`signal`), light gray (`warn`), and dim gray (`alert`). The hero halo, error boundary, manifest card traffic-light dots, logo SVG, and `icon.svg` were retokenized. `docs/01-brand-identity.md` palette table updated. **Banned hues as brand accents:** orange, violet, coral, fuchsia, indigo. Screenshots in `docs/screenshots/` still reflect the chromatic version and need re-capture from a live deploy as a follow-up gate. |
 | 2026-05-08 | DESIGN.md created (Wave 2 polish). 15 sections per playbook v2 §A. Sourced palette + typography + voice from existing `docs/01-brand-identity.md`. |
 | 2026-05-08 | Pricing rebuilt — split into "Self-hosted (free)" + 3 Cloud tiers. Cloud CTAs wired to `POST /api/checkout/nowpayments`. Self-hosted CTA stays as `curl install.sh`. |
 | 2026-05-08 | Added `app/error.tsx` and `app/not-found.tsx` so unhandled exceptions stop leaking the Next.js redacted-digest config dump in production logs. The startup error trail visible in `docker compose logs` was traced to bot probes hitting Server Action endpoints with malformed `x-action-redirect` headers; the boundary catches the render-side variants and the Server Action probe noise (`SyntaxError: missing )`, `Invalid character in header content`) is upstream of any code we own (Next.js framework error handlers raise on bad probes regardless of our routes). Documented as known noise — not affecting users (all real requests still return 200). |

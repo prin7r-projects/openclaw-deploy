@@ -1,3 +1,6 @@
+// [LANDING_HOME] /apps/landing/app/page.tsx
+// Single-page marketing surface. PRI-3519 retokenization: the hero halo
+// background was retokenized from phosphor green to neutral off-white.
 import { Hero } from '@/components/Hero';
 import { StatusBand } from '@/components/StatusBand';
 import { FeatureTriad } from '@/components/FeatureTriad';
@@ -14,8 +17,8 @@ export default function HomePage() {
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden />
       <div
-        className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full opacity-20 blur-3xl"
-        style={{ background: 'radial-gradient(closest-side, #7CFFA1 0%, transparent 100%)' }}
+        className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full opacity-15 blur-3xl"
+        style={{ background: 'radial-gradient(closest-side, #E6ECF2 0%, transparent 100%)' }}
         aria-hidden
       />
       <div className="relative">

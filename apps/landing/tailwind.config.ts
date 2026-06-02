@@ -9,7 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Cold Iron palette
+        // Cold Iron monochrome palette (Wave 2 retokenization, PRI-3519).
+        // Brand accent colors were removed to comply with the Wave One
+        // white/neutral/taste standard. State is encoded by lightness only:
+        // off-white = running/healthy, light-gray = warn/drift, mid-gray = muted.
+        // The previous phosphor-green / amber / coral / violet tokens
+        // (signal #7CFFA1, warn #FFC857, alert #FF6B6B, tok-ref #C4B5FD) have
+        // been retired. Status meaning is carried by labels, not by hue.
         surface: {
           0: '#0B0E12',
           1: '#11161D',
@@ -23,9 +29,12 @@ const config: Config = {
           primary: '#E6ECF2',
           muted: '#7E8A9A',
         },
-        signal: '#7CFFA1',
-        warn: '#FFC857',
-        alert: '#FF6B6B',
+        // Monochrome state tokens (no chromatic brand accents).
+        // All map to the same neutral grays regardless of semantic role
+        // (running / drift / draining / error) — see docs/01-brand-identity.md.
+        signal: '#E6ECF2', // was phosphor green #7CFFA1
+        warn: '#B8B8B8',   // was amber #FFC857
+        alert: '#6B6B6B',  // was coral #FF6B6B
       },
       fontFamily: {
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],
@@ -40,13 +49,14 @@ const config: Config = {
         xl: '14px',
       },
       animation: {
+        // Status pulses now modulate light gray, not phosphor green.
         'pulse-signal': 'pulseSignal 1.6s ease-in-out infinite',
         'blink-alert': 'blinkAlert 2s steps(2, end) infinite',
       },
       keyframes: {
         pulseSignal: {
-          '0%, 100%': { boxShadow: '0 0 0 3px rgba(124,255,161,0.18)' },
-          '50%': { boxShadow: '0 0 0 6px rgba(124,255,161,0.34)' },
+          '0%, 100%': { boxShadow: '0 0 0 3px rgba(230,236,242,0.10)' },
+          '50%': { boxShadow: '0 0 0 6px rgba(230,236,242,0.22)' },
         },
         blinkAlert: {
           '50%': { opacity: '0.3' },

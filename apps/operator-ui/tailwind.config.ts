@@ -9,6 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Cold Iron monochrome palette (Wave 2 retokenization, PRI-3519).
+        // See apps/landing/tailwind.config.ts for the canonical token table.
+        // Phosphor green / amber / coral were removed; the surface now uses
+        // only off-white, neutral gray, and near-black. Status meaning is
+        // carried by labels next to the dot, never by hue.
         surface: {
           0: '#0B0E12',
           1: '#11161D',
@@ -22,9 +27,9 @@ const config: Config = {
           primary: '#E6ECF2',
           muted: '#7E8A9A',
         },
-        signal: '#7CFFA1',
-        warn: '#FFC857',
-        alert: '#FF6B6B',
+        signal: '#E6ECF2', // was phosphor green #7CFFA1
+        warn: '#B8B8B8',   // was amber #FFC857
+        alert: '#6B6B6B',  // was coral #FF6B6B
       },
       fontFamily: {
         display: ['Space Grotesk', 'sans-serif'],

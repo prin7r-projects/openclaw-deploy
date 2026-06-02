@@ -4,6 +4,10 @@
 
 @layer base {
   :root {
+    /* Cold Iron monochrome palette (PRI-3519 retokenization).
+       Phosphor green / amber / coral were removed; the operator UI now
+       uses off-white, neutral gray, and near-black. See
+       docs/01-brand-identity.md §Visual system for the canonical table. */
     --surface-0: #0B0E12;
     --surface-1: #11161D;
     --surface-2: #1B232E;
@@ -11,9 +15,9 @@
     --border-subtle: #1F2733;
     --text-primary: #E6ECF2;
     --text-muted: #7E8A9A;
-    --signal: #7CFFA1;
-    --warn: #FFC857;
-    --alert: #FF6B6B;
+    --signal: #E6ECF2;
+    --warn: #B8B8B8;
+    --alert: #6B6B6B;
   }
 
   * {

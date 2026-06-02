@@ -63,12 +63,15 @@ export function ManifestShowcase() {
 
 function ManifestCard() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[0_24px_60px_-30px_rgba(124,255,161,0.18)]">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[0_24px_60px_-30px_rgba(230,236,242,0.10)]">
       <div className="flex items-center justify-between border-b border-border-subtle bg-surface-2/50 px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-alert/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-warn/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-signal/60" />
+          {/* PRI-3519: window-control dots retokenized from red/amber/green
+              to three neutral grays. They remain visually distinct via
+              lightness ordering only — no chromatic brand accent. */}
+          <span className="h-2.5 w-2.5 rounded-full bg-alert" />
+          <span className="h-2.5 w-2.5 rounded-full bg-warn" />
+          <span className="h-2.5 w-2.5 rounded-full bg-signal" />
         </div>
         <span className="font-mono text-[11px] uppercase tracking-widest text-text-muted">
           fleet.yaml

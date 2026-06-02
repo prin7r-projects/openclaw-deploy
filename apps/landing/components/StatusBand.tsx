@@ -31,7 +31,7 @@ const stateLabel: Record<Row['state'], string> = {
 export function StatusBand() {
   return (
     <section className="mx-auto max-w-6xl px-6 pb-16 md:pb-24">
-      <div className="overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[0_0_0_1px_rgba(124,255,161,0.04)]">
+      <div className="overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[0_0_0_1px_rgba(230,236,242,0.04)]">
         <div className="flex items-center justify-between border-b border-border-subtle bg-surface-2/40 px-5 py-3">
           <div className="flex items-center gap-3 font-mono text-[12px] uppercase tracking-widest text-text-muted">
             <span className="dot dot-signal" />

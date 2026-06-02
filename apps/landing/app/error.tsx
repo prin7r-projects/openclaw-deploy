@@ -35,7 +35,8 @@ export default function GlobalError({
         <div style={{ maxWidth: '32rem', textAlign: 'center' }}>
           <p
             style={{
-              color: '#7CFFA1',
+              // PRI-3519: was phosphor green #7CFFA1, now neutral off-white.
+              color: '#E6ECF2',
               fontFamily:
                 'ui-monospace, SFMono-Regular, Menlo, monospace',
               fontSize: '0.75rem',
@@ -57,9 +58,10 @@ export default function GlobalError({
             type="button"
             onClick={() => reset()}
             style={{
-              background: 'rgba(124,255,161,0.1)',
-              border: '1px solid #7CFFA1',
-              color: '#7CFFA1',
+              // PRI-3519: was phosphor green halo + border. Now neutral.
+              background: 'rgba(230,236,242,0.08)',
+              border: '1px solid #E6ECF2',
+              color: '#E6ECF2',
               padding: '0.625rem 1.25rem',
               fontFamily:
                 'ui-monospace, SFMono-Regular, Menlo, monospace',

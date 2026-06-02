@@ -52,7 +52,9 @@ OpenClaw Deploy is the **reconciliation loop** an agent fleet operator needs in 
 
 ## Visual system
 
-### Palette — "Cold Iron"
+### Palette — "Cold Iron" (monochrome, PRI-3519 retokenization)
+
+The palette was retokenized in PRI-3519 to apply the Wave One white/neutral/taste standard: chromatic brand accents (phosphor green / amber / coral / violet) were removed from CTA, badge, border, and state surfaces. State meaning is now carried by the **label next to the dot**, not by hue. The near-black background and off-white body text are unchanged because they are the operator-on-terminal lineage and pass WCAG AAA on their own.
 
 | Role | Hex | Usage |
 |---|---|---|
@@ -60,13 +62,17 @@ OpenClaw Deploy is the **reconciliation loop** an agent fleet operator needs in 
 | `surface.1` | `#11161D` | Card / panel background |
 | `surface.2` | `#1B232E` | Hover / elevated surface |
 | `border` | `#27313F` | Hairline dividers (1px) |
+| `border.subtle` | `#1F2733` | Inner divider, lower contrast |
 | `text.primary` | `#E6ECF2` | Body text on dark |
 | `text.muted` | `#7E8A9A` | Secondary text, captions, labels |
-| `accent.signal` | `#7CFFA1` | Primary CTA, "healthy / running" status — phosphor green |
-| `accent.warn` | `#FFC857` | Drift / pending — amber |
-| `accent.alert` | `#FF6B6B` | Error / down — desaturated coral |
+| `accent.signal` | `#E6ECF2` | Primary CTA + "healthy / running" — off-white. Was `#7CFFA1` phosphor green. |
+| `accent.warn` | `#B8B8B8` | Drift / draining / pending — light neutral gray. Was `#FFC857` amber. |
+| `accent.alert` | `#6B6B6B` | Error / down — dim neutral gray. Was `#FF6B6B` coral. |
+| `tok.ref` | `#B8B8B8` | Manifest snippet `ref(...)` token. Was `#C4B5FD` violet. |
 
-**Why it works for the audience**: operators stare at terminals. Phosphor-green-on-near-black is the lineage of `top`, `htop`, `tmux`, every NOC dashboard ever shipped. Amber and coral are the canonical drift / alert colors of the Grafana / Prometheus / observability tradition. No marketing-deck purple. No hero gradient.
+**Forbidden brand hues** (PRI-3519): `orange`, `violet`, `coral`, `fuchsia`, `indigo`, and any other chromatic accent on CTA, badge, border, or state surfaces. The only colors allowed for status are the three neutral grays above. If a future feature genuinely needs a chromatic cue (e.g., a red action button that performs a destructive op), it must be reviewed against the Wave One taste standard first.
+
+**Why monochrome works for the audience**: operators stare at terminals. Off-white-on-near-black is the lineage of `man` pages, `less`, `tig`, every dry-run diff, every pager ack screen. State is carried by the *word next to the indicator*, which is what dashboards in NOCs have always done (a green "OK" pill and a red "ALERT" pill both still read at 03:00 because the words are what the operator is parsing). The previous chromatic version was a Wave 2 placeholder; the Wave One taste standard wins.
 
 ### Typography pairing
 
@@ -85,14 +91,14 @@ Inline SVG sketch (used as the favicon and site mark):
 ```svg
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="OpenClaw Deploy">
   <rect x="0" y="0" width="64" height="64" fill="#0B0E12" rx="10"/>
-  <!-- left bracket -->
-  <path d="M18 14 H10 V50 H18" fill="none" stroke="#7CFFA1" stroke-width="3" stroke-linecap="square"/>
-  <!-- right bracket -->
-  <path d="M46 14 H54 V50 H46" fill="none" stroke="#7CFFA1" stroke-width="3" stroke-linecap="square"/>
-  <!-- three fleet ticks -->
+  <!-- left bracket (was #7CFFA1 phosphor green; now off-white per PRI-3519) -->
+  <path d="M18 14 H10 V50 H18" fill="none" stroke="#E6ECF2" stroke-width="3" stroke-linecap="square"/>
+  <!-- right bracket (was #7CFFA1 phosphor green; now off-white per PRI-3519) -->
+  <path d="M46 14 H54 V50 H46" fill="none" stroke="#E6ECF2" stroke-width="3" stroke-linecap="square"/>
+  <!-- three fleet ticks (last tick was #7CFFA1; now off-white per PRI-3519) -->
   <rect x="22" y="22" width="20" height="3" fill="#E6ECF2"/>
   <rect x="22" y="30.5" width="20" height="3" fill="#E6ECF2"/>
-  <rect x="22" y="39" width="20" height="3" fill="#7CFFA1"/>
+  <rect x="22" y="39" width="20" height="3" fill="#E6ECF2"/>
 </svg>
 ```
 
@@ -104,14 +110,14 @@ Inline SVG sketch (used as the favicon and site mark):
 
 ### Motion
 
-- **Principle**: reveal state, never decorate. A button hover changes border color and adds a 1px inset glow in `accent.signal` — that's the maximum motion. No swooping sections, no parallax.
+- **Principle**: reveal state, never decorate. A button hover changes border color and adds a 1px inset glow in `accent.signal` (now off-white, see PRI-3519) — that's the maximum motion. No swooping sections, no parallax.
 - **Duration**: 120ms ease-out for hovers, 200ms ease-out for state transitions, 0ms for status changes (status updates should *snap* — not animate).
-- **Status pulse**: a healthy-agent dot pulses at 1.6Hz with a fixed 6px outer halo. Drift dots are static amber. Down dots blink at 0.5Hz.
+- **Status pulse**: a healthy-agent dot pulses at 1.6Hz with a fixed 6px outer halo. The pulse animates off-white only — no chromatic hue. Drift dots are static light gray. Down dots blink at 0.5Hz in dim gray.
 
 ## What this brand is *not*
 
 - It is not a chat product. No bubbles, no avatars, no "Hi, I'm your AI assistant".
-- It is not a Vercel / Linear / Anthropic mimic. Cold-iron green-on-black is deliberately industrial-control-room.
+- It is not a Vercel / Linear / Anthropic mimic. Cold-iron off-white-on-black is deliberately industrial-control-room (Wave One taste standard, PRI-3519).
 - It is not playful. The audience does not want playful at 03:00.
 
 ## Anti-personas (will not design for)
