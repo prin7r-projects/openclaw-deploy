@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
+import postgres from 'postgres';
 
 // [NOWPAYMENTS_INTEGRATION] /apps/landing/app/api/webhooks/nowpayments/route.ts
-// IPN webhook stub. Verifies x-nowpayments-sig HMAC-SHA512 over the JSON body
-// after NOWPayments' canonical key sort. Stub does not yet persist orders —
-// that is the job of the Wave 3 control plane.
+// IPN webhook: verifies x-nowpayments-sig HMAC-SHA512, then activates the
+// cloud_tier_activations row on finished/confirmed payment status.
+
+const AMOUNT_TO_PLAN: Record<number, string> = {
+  199: 'cloud-team',
+  899: 'cloud-org',
+  2400: 'cloud-enterprise',
+};
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -119,14 +125,73 @@ export async function POST(req: Request) {
     status,
   );
 
-  // TODO (Wave 3 control plane): persist order, mark paid on `finished`/`confirmed`,
-  // emit downstream provisioning event for the cloud tenant.
+  const isPaid = ['finished', 'confirmed'].includes(
+    (status ?? '').toLowerCase(),
+  );
+
+  let activated = false;
+  if (isPaid && orderId) {
+    const dbUrl = process.env.DATABASE_URL;
+    if (dbUrl) {
+      const sql = postgres(dbUrl, { max: 1, idle_timeout: 5 });
+      try {
+        const rawAmount =
+          typeof payload.price_amount === 'number'
+            ? payload.price_amount
+            : typeof payload.price_amount === 'string'
+            ? parseFloat(payload.price_amount)
+            : 0;
+        const amountUsd = Math.round(rawAmount) || null;
+        const plan = (amountUsd ? AMOUNT_TO_PLAN[amountUsd] : null) ?? null;
+
+        // Activate existing pending row. Idempotent: no-op if already active.
+        const result = await sql`
+          UPDATE cloud_tier_activations
+             SET status       = 'active',
+                 activated_at = NOW()
+           WHERE order_id = ${orderId}
+             AND status != 'active'
+        `;
+        activated = result.count > 0;
+
+        if (!activated) {
+          // Check if row exists but was already active (replay case).
+          const [existing] = await sql<{ status: string }[]>`
+            SELECT status FROM cloud_tier_activations WHERE order_id = ${orderId} LIMIT 1
+          `;
+          activated = existing?.status === 'active';
+        }
+
+        if (!activated) {
+          // No checkout row — insert directly so the payment is never lost.
+          await sql`
+            INSERT INTO cloud_tier_activations (order_id, plan, amount_usd, status, activated_at)
+            VALUES (${orderId}, ${plan}, ${amountUsd}, 'active', NOW())
+          `;
+          activated = true;
+        }
+
+        console.info(
+          '[NOWPAYMENTS_WEBHOOK] activation order=%s plan=%s amount=%s activated=%s',
+          orderId, plan, amountUsd, activated,
+        );
+      } catch (err) {
+        console.error('[NOWPAYMENTS_WEBHOOK] db_error:', err);
+      } finally {
+        await sql.end({ timeout: 3 });
+      }
+    } else {
+      console.warn('[NOWPAYMENTS_WEBHOOK] DATABASE_URL not set; skipping activation');
+    }
+  }
+
   return NextResponse.json(
     {
       ok: true,
       verified: true,
       order_id: orderId,
       status,
+      activated,
     },
     { status: 200 },
   );
