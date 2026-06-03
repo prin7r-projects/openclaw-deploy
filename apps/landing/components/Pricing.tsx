@@ -4,7 +4,11 @@ import { Check, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
 // [NOWPAYMENTS_INTEGRATION] /apps/landing/components/Pricing.tsx
-// Self-hosted (install.sh) stays free. Cloud tiers route to NOWPayments.
+// Self-hosted (install.sh) stays free. Cloud tiers route to NOWPayments if
+// NOWPAYMENTS_API_KEY is set on the server; otherwise they fall back to a
+// durable order/contact capture via /api/orders/contact, which returns a
+// pre-populated mailto: link. Every paid CTA is therefore always actionable —
+// no dead buttons.
 
 type Tier = {
   id: string;
@@ -118,9 +122,38 @@ export function Pricing() {
         window.location.href = data.invoice_url;
         return;
       }
+      // Fallback path: NOWPayments is not configured / unreachable. Open the
+      // durable order/contact capture endpoint, which returns a pre-populated
+      // mailto: link so the visitor's mail client opens with the order. This
+      // keeps every paid CTA actionable even with no env on the server.
+      const fallback = await fetch('/api/orders/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ plan: tier.plan }),
+      });
+      const fallbackData = (await fallback.json()) as {
+        ok?: boolean;
+        mailto_url?: string;
+        message?: string;
+        error?: string;
+      };
+      if (fallback.ok && fallbackData.ok && fallbackData.mailto_url) {
+        setStateById((s) => ({
+          ...s,
+          [tier.id]: {
+            loading: false,
+            error:
+              'Crypto checkout is offline on this server — opening your mail client with a pre-filled order request.',
+          },
+        }));
+        window.location.href = fallbackData.mailto_url;
+        return;
+      }
       const msg =
         data.message ??
         data.error ??
+        fallbackData.message ??
+        fallbackData.error ??
         `Checkout unavailable (HTTP ${res.status}).`;
       setStateById((s) => ({ ...s, [tier.id]: { loading: false, error: msg } }));
     } catch (err) {
