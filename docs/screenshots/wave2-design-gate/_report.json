@@ -1,0 +1,35 @@
+{
+  "baseUrl": "http://localhost:3308/",
+  "outDir": "/paperclip/instances/default/workspaces/openclaw-deploy/docs/screenshots/wave2-design-gate",
+  "checks": {
+    "desktop": {
+      "scrollW": 1440,
+      "clientW": 1440,
+      "h1": [
+        {
+          "t": "Declare what you want.We reconcile until",
+          "w": 896,
+          "cw": 896
+        },
+        {
+          "t": "A small surface. Operator-grade.",
+          "w": 539,
+          "cw": 539
+        },
+        {
+          "t": "That's it. That's the API.",
+          "w": 545,
+          "cw": 545
+        }
+      ]
+    },
+    "mobile": {
+      "scrollW": 390,
+      "clientW": 390,
+      "horizScroll": false
+    },
+    "payment": {
+      "ctaText": "Run the open-source control plane yourself for nothing — or "
+    }
+  }
+}
