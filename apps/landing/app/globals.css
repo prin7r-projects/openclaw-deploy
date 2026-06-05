@@ -19,6 +19,27 @@
     background: rgba(230, 236, 242, 0.18);
     color: #E6ECF2;
   }
+
+  /* Keyboard focus styling (PRI-5762 M3 repair).
+     The Tailwind preflight gives a default :focus-visible outline that
+     is too quiet for the Cold Iron dark surface. We replace it with a
+     2px off-white outline + 2px dark inset offset so the focus ring
+     is visible against any background on the landing — both light
+     text on dark and dark text on the light "signal" CTA swap. */
+  :focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid #E6ECF2;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Suppress the focus ring on programmatic focus for elements that
+     should never show it (decorative dots, status pills, etc.). */
+  [data-no-focus]:focus,
+  [data-no-focus]:focus-visible {
+    outline: none;
+  }
 }
 
 @layer utilities {

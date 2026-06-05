@@ -49,7 +49,65 @@ function generateOrderId(plan: CloudPlan): string {
   return `ocd-${plan}-${ts}-${rand}`;
 }
 
+// Per-client rate limit. The route mints order ids that flow into
+// NOWPayments invoices, so an empty or scripted POST is throttled here
+// to keep the upstream invoice quota clean. Same shape as the contact
+// fallback route (5 / 10 min, sliding window).
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE: Map<string, number[]> = new Map();
+
+function clientKey(req: Request): string {
+  const xff = req.headers.get('x-forwarded-for');
+  if (xff) {
+    const first = xff.split(',')[0]?.trim();
+    if (first) return `ip:${first}`;
+  }
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return `ip:${realIp.trim()}`;
+  const ua = req.headers.get('user-agent') ?? 'unknown';
+  let h = 0x811c9dc5;
+  for (let i = 0; i < ua.length; i++) {
+    h ^= ua.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return `ua:${h.toString(16)}`;
+}
+
+function rateLimit(key: string): { ok: boolean; retryAfter: number } {
+  const now = Date.now();
+  const arr = (RATE.get(key) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (arr.length >= RATE_LIMIT) {
+    const oldest = arr[0] ?? now;
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((RATE_WINDOW_MS - (now - oldest)) / 1000),
+    );
+    RATE.set(key, arr);
+    return { ok: false, retryAfter };
+  }
+  arr.push(now);
+  RATE.set(key, arr);
+  return { ok: true, retryAfter: 0 };
+}
+
 export async function POST(req: Request) {
+  const key = clientKey(req);
+  const rl = rateLimit(key);
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error: 'rate_limited',
+        message:
+          'Too many checkout requests from this client. Try again in a few minutes.',
+      },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(rl.retryAfter) },
+      },
+    );
+  }
+
   let payload: { plan?: string };
   try {
     payload = (await req.json()) as { plan?: string };

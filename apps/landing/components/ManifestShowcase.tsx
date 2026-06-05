@@ -20,7 +20,7 @@ export function ManifestShowcase() {
           <ul className="space-y-4 text-[15px]">
             <li className="flex items-start gap-3">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded border border-border bg-surface-1">
-                <FileCheck2 className="h-3.5 w-3.5 text-signal" />
+                <FileCheck2 aria-hidden className="h-3.5 w-3.5 text-signal" />
               </span>
               <span className="text-text-muted">
                 <span className="text-text-primary">Schema-validated.</span>{' '}
@@ -30,7 +30,7 @@ export function ManifestShowcase() {
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded border border-border bg-surface-1">
-                <GitMerge className="h-3.5 w-3.5 text-signal" />
+                <GitMerge aria-hidden className="h-3.5 w-3.5 text-signal" />
               </span>
               <span className="text-text-muted">
                 <span className="text-text-primary">Diff-then-apply.</span>{' '}
@@ -42,7 +42,7 @@ export function ManifestShowcase() {
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded border border-border bg-surface-1">
-                <Terminal className="h-3.5 w-3.5 text-signal" />
+                <Terminal aria-hidden className="h-3.5 w-3.5 text-signal" />
               </span>
               <span className="text-text-muted">
                 <span className="text-text-primary">CLI-first.</span> The

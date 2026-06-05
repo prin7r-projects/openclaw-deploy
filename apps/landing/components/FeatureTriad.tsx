@@ -42,7 +42,7 @@ export function FeatureTriad() {
             className="group relative flex flex-col gap-4 rounded-xl border border-border bg-surface-1 p-6 transition-colors hover:border-signal/40"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-2">
-              <Icon className="h-5 w-5 text-signal" />
+              <Icon aria-hidden className="h-5 w-5 text-signal" />
             </div>
             <h3 className="font-display text-xl font-600 leading-snug text-text-primary">
               {title}

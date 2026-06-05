@@ -126,10 +126,17 @@ export function Pricing() {
       // durable order/contact capture endpoint, which returns a pre-populated
       // mailto: link so the visitor's mail client opens with the order. This
       // keeps every paid CTA actionable even with no env on the server.
+      // We attach a non-empty `note` so the server-side validation
+      // (email-or-note required) is satisfied without depending on the
+      // visitor having typed an email.
       const fallback = await fetch('/api/orders/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ plan: tier.plan }),
+        body: JSON.stringify({
+          plan: tier.plan,
+          source: 'pricing-cta',
+          note: `Pricing CTA fallback for ${tier.name} (window.location requested checkout).`,
+        }),
       });
       const fallbackData = (await fallback.json()) as {
         ok?: boolean;

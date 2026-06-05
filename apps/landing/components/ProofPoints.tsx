@@ -41,7 +41,7 @@ export function ProofPoints() {
             className="flex items-start gap-4 rounded-xl border border-border bg-surface-1 p-6"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2">
-              <Icon className="h-5 w-5 text-signal" />
+              <Icon aria-hidden className="h-5 w-5 text-signal" />
             </div>
             <div>
               <h3 className="mb-1.5 font-display text-lg font-600 text-text-primary">

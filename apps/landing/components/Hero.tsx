@@ -29,21 +29,22 @@ export function Hero() {
             href={REPO}
             className="group inline-flex items-center gap-2 rounded border border-signal bg-signal/10 px-5 py-2.5 font-mono text-sm text-signal transition-all hover:bg-signal hover:text-surface-0"
           >
-            <Github className="h-4 w-4" />
+            <Github aria-hidden className="h-4 w-4" />
             View on GitHub
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight aria-hidden className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
           <a
             href={DOCS}
             className="inline-flex items-center gap-2 rounded border border-border bg-surface-1 px-5 py-2.5 font-mono text-sm text-text-primary transition-all hover:border-text-muted"
           >
-            <BookOpenText className="h-4 w-4" />
+            <BookOpenText aria-hidden className="h-4 w-4" />
             Read the docs
           </a>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-4 font-mono text-[12px] text-text-muted">
           <span>$ curl -fsSL openclaw-deploy.prin7r.com/install.sh | bash</span>
+          <span className="text-text-muted/70">// runs in smoke mode by default — probes the control plane and prints next steps</span>
         </div>
       </div>
     </section>
